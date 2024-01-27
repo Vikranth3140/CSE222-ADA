@@ -1,4 +1,3 @@
-
 \documentclass{article}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath}
@@ -16,32 +15,68 @@
 \maketitle
 
 \section{Preprocessing}
-In this problem, no specific preprocessing steps are required as the input arrays A, B, and C are assumed to be sorted in ascending order. We have assumed/have been given the following: 1. A,B,C are sorted arrays.\2. Indices for all arrays start from 0 and end at n-1.\3.
+In this problem, no specific preprocessing steps are required. We assume or have been given the following:
+\begin{enumerate}
+    \item $A$, $B$, $C$ are sorted arrays.
+    \item k lies between 1 and 3n.
+    \item Indices for all arrays start from 0 and end at $n-1$.
+    \item Comparing two elements can be done in O(1) time.
+    \item The same numbers are considered unique in different arrays, i.e if the numbers in the union are 1,2,2,3 and we have to find 3rd smallest element, then it will be 2.
+\end{enumerate}
 
 \section{Algorithm Description}
-The algorithm uses a binary search approach to find the k-th smallest element in the union of three sorted arrays A, B, and C. It efficiently narrows down the search space based on the comparison of mid-values in the arrays.
+The algorithm uses a nested binary search approach to find the $k$-th smallest element in the union of three sorted arrays $A$, $B$, and $C$. In the \textsc{Kth Smallest Element} function, we first find the maximum (called high) and minimum (called low) element of the Union Array (say $A' = A \cup B \cup C$) by comparing $A[0]$, $B[0]$, $C[0]$, and $A[n-1]$, $B[n-1]$, $C[n-1]$ respectively.
+\\\\
+We use binary search with mid being the middle of the range [$low$, $high$]. Now, the helper function \textsc{recursiveBinarySearchCount} is called for each array separately.
+\\\\
+\textsc{recursiveBinarySearchCount} is a recursive binary function that finds the number of elements that appear before mid in the array. We find this value for each function and then add them to evaluate the variable \textit{totalCount} in \textsc{Kth Smallest Element} function.
+\\\\
+If \textit{totalCount} is less than $k$, then our answer would lie in the half right of mid, so the algorithm shifts $low$ to $mid+1$. If \textit{totalCount} is greater than or equal to $k$, our answer would lie in the half left of mid, so $high$ shifts to $mid$ (as the answer can be equal to mid also). We return $low$ after finishing this search, which is precisely the $k$-th smallest element in $A'$.
+
+
 
 \section{Recurrence Relation}
-The algorithm doesn't involve recursion, so there is no recurrence relation.
+The time complexity of the algorithm can be expressed by the recurrence relation
+
+
+\[ T(n) = T(\log n) + T(\log n) \]
+
+where $n$ is the size of the input arrays $A$, $B$, and $C$. This recurrence relation represents the binary search operations on each array, which leads to the overall $O(\log^2 n)$ time complexity.
+\\\\
+The recurrence relation suggests that at each level of the binary search, we are dividing the problem into two subproblems, each of size $\log n$. Since we perform this operation recursively on each subproblem, we have a total of $O(\log^2 n)$ binary search operations.
 
 \section{Complexity Analysis}
-The time complexity of the algorithm is O(log n), where n is the size of the input arrays A, B, and C. This is achieved through binary search operations on each array and subsequent convergence of the search space.
-
-The space complexity is O(1) as the algorithm uses a constant amount of additional space for variables.
+The time complexity of the algorithm is $O(\log^2 n)$, where $n$ is the size of the input arrays $A$, $B$, and $C$. This is achieved through binary search operations on each array and subsequent convergence of the search space. The space complexity is $O(1)$ as the algorithm uses a constant amount of additional space for variables.
+\\\\
+The $O(\log^2 n)$ time complexity implies that the algorithm efficiently finds the $k$-th smallest element with significantly reduced computational effort compared to linear search methods.
 
 \section{Pseudocode}
 \begin{algorithm}
 \caption{Kth Smallest Element}
 \begin{algorithmic}[1]
+    \Function{recursiveBinarySearchCount}{$arr, target, low, high$}
+        \If{$low > high$}
+            \State \Return $0$
+        \EndIf
+        \State $mid \gets low + (high - low) / 2$
+        \If{$arr[mid] \leq target$}
+            \State \Return $mid - low + 1 +$ \Call{recursiveBinarySearchCount}{$arr, target, mid + 1, high$}
+        \Else
+            \State \Return \Call{recursiveBinarySearchCount}{$arr, target, low, mid - 1$}
+        \EndIf
+    \EndFunction
+
+    \vspace{0.5cm}
+
     \Function{KthSmallestElement}{$A, B, C, k$}
-        \State $low \gets \min(A[0],B[0],C[0])$
+        \State $low \gets \min(A[0], B[0], C[0])$
         \State $high \gets \max(A[n-1], B[n-1], C[n-1])$
         
         \While{$low < high$}
             \State $mid \gets low + (high - low) / 2$
-            \State $a\_count \gets$ \Call{BinarySearchCount}{$A, mid$}
-            \State $b\_count \gets$ \Call{BinarySearchCount}{$B, mid$}
-            \State $c\_count \gets$ \Call{BinarySearchCount}{$C, mid$}
+            \State $a\_count \gets$ \Call{recursiveBinarySearchCount}{$A, mid, 0, \text{size of } A - 1$}
+            \State $b\_count \gets$ \Call{recursiveBinarySearchCount}{$B, mid, 0, \text{size of } B - 1$}
+            \State $c\_count \gets$ \Call{recursiveBinarySearchCount}{$C, mid, 0, \text{size of } C - 1$}
             \State $total\_count \gets a\_count + b\_count + c\_count$
             
             \If{$total\_count < k$}
@@ -56,7 +91,29 @@ The space complexity is O(1) as the algorithm uses a constant amount of addition
 \end{algorithmic}
 \end{algorithm}
 
+
 \section{Proof of Correctness}
-The correctness of the algorithm lies in the binary search approach, which efficiently narrows down the search space until the k-th smallest element is found. The algorithm maintains correctness by ensuring that the counts of elements less than or equal to the mid-value in each array are correctly calculated.
+Let's assume that the arrays $A$, $B$, and $C$ are sorted in ascending order. Also, let $A'$ be the union of $A$, $B$, and $C$. We want to find the $k$-th smallest element in $A'$.
+\\\\
+The algorithm uses a binary search approach to efficiently narrow down the search space. The variable $low$ represents the minimum possible value for the $k$-th smallest element, and $high$ represents the maximum possible value.
+\\\\
+In each iteration of the while loop, the algorithm calculates the middle value $mid$ between $low$ and $high$ and counts the number of elements less than or equal to $mid$ in each of the arrays $A$, $B$, and $C$ using the \textsc{recursiveBinarySearchCount} function.
+\\\\
+The total count is then calculated as the sum of counts from all three arrays. If the total count is less than $k$, it means that the $k$-th smallest element must be in the right half of the current search space. Therefore, the algorithm updates $low$ to $mid + 1$. If the total count is greater than or equal to $k$, the $k$-th smallest element must be in the left half of the current search space, and $high$ is updated to $mid$.
+\\\\
+The algorithm continues this process until $low$ and $high$ converge, at which point $low$ represents the $k$-th smallest element.
+\\\\
+Now, let's consider the correctness of the algorithm:
+\\\\
+1. Initialization:
+   - At the beginning of the algorithm, $low$ is set to the minimum element in $A'$, and $high$ is set to the maximum element in $A'$. This ensures that the search space is initialized correctly.
+\\\\
+2. Maintenance:
+   - In each iteration of the while loop, the search space is narrowed down by updating either $low$ or $high$ based on the total count of elements less than or equal to $mid$. The algorithm correctly maintains the search space to eventually converge to the $k$-th smallest element.
+\\\\
+3. Termination:
+   - The while loop terminates when $low$ and $high$ converge. At this point, $low$ represents the $k$-th smallest element in $A'$. The algorithm correctly identifies the $k$-th smallest element within the sorted union of arrays.
+\\\\
+Therefore, the algorithm is correct and efficiently finds the $k$-th smallest element in the union of three sorted arrays.
 
 \end{document}
