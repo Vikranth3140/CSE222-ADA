@@ -1,0 +1,62 @@
+
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[margin=2.2cm]{geometry}
+
+\title{Theory Assignment-1: ADA Winter-2024}
+\author{Vikranth Udandarao (2022570) \and Ansh Varshney (2022083)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing}
+In this problem, no specific preprocessing steps are required as the input arrays A, B, and C are assumed to be sorted in ascending order. We have assumed/have been given the following: 1. A,B,C are sorted arrays.\2. Indices for all arrays start from 0 and end at n-1.\3.
+
+\section{Algorithm Description}
+The algorithm uses a binary search approach to find the k-th smallest element in the union of three sorted arrays A, B, and C. It efficiently narrows down the search space based on the comparison of mid-values in the arrays.
+
+\section{Recurrence Relation}
+The algorithm doesn't involve recursion, so there is no recurrence relation.
+
+\section{Complexity Analysis}
+The time complexity of the algorithm is O(log n), where n is the size of the input arrays A, B, and C. This is achieved through binary search operations on each array and subsequent convergence of the search space.
+
+The space complexity is O(1) as the algorithm uses a constant amount of additional space for variables.
+
+\section{Pseudocode}
+\begin{algorithm}
+\caption{Kth Smallest Element}
+\begin{algorithmic}[1]
+    \Function{KthSmallestElement}{$A, B, C, k$}
+        \State $low \gets \min(A[0],B[0],C[0])$
+        \State $high \gets \max(A[n-1], B[n-1], C[n-1])$
+        
+        \While{$low < high$}
+            \State $mid \gets low + (high - low) / 2$
+            \State $a\_count \gets$ \Call{BinarySearchCount}{$A, mid$}
+            \State $b\_count \gets$ \Call{BinarySearchCount}{$B, mid$}
+            \State $c\_count \gets$ \Call{BinarySearchCount}{$C, mid$}
+            \State $total\_count \gets a\_count + b\_count + c\_count$
+            
+            \If{$total\_count < k$}
+                \State $low \gets mid + 1$
+            \Else
+                \State $high \gets mid$
+            \EndIf
+        \EndWhile
+        
+        \State \Return $low$
+    \EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{Proof of Correctness}
+The correctness of the algorithm lies in the binary search approach, which efficiently narrows down the search space until the k-th smallest element is found. The algorithm maintains correctness by ensuring that the counts of elements less than or equal to the mid-value in each array are correctly calculated.
+
+\end{document}
