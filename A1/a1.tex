@@ -36,18 +36,17 @@ If \textit{totalCount} is less than $k$, then our answer would lie in the half r
 
 
 \section{Recurrence Relation}
-The time complexity of the algorithm can be expressed by the recurrence relation
+The algorithm used is not recursive in nature and so, there will not be any recurrence relation.
 
-
-\[ T(n) = T(\log n) + T(\log n) \]
-
-where $n$ is the size of the input arrays $A$, $B$, and $C$. This recurrence relation represents the binary search operations on each array, which leads to the overall $O(\log^2 n)$ time complexity.
-\\\\
-The recurrence relation suggests that at each level of the binary search, we are dividing the problem into two subproblems, each of size $\log n$. Since we perform this operation recursively on each subproblem, we have a total of $O(\log^2 n)$ binary search operations.
 
 \section{Complexity Analysis}
-The time complexity of the algorithm is $O(\log^2 n)$, where $n$ is the size of the input arrays $A$, $B$, and $C$. This is achieved through binary search operations on each array and subsequent convergence of the search space. The space complexity is $O(1)$ as the algorithm uses a constant amount of additional space for variables.
-\\\\
+The time complexity of the algorithm is $O(\log^2 n)$, where $n$ is the size of the input arrays $A$, $B$, and $C$. We can derive this in the following way:
+\begin{enumerate}
+    \item We used binary search in Kth SMALLEST ELEMENT FUNCTION. The range will be 3n elements for this binary search as it covers all the elements of all the arrays.
+    \item For each iteration in the Binary Search, we use three different binary searches for each array, i.e. for n elements.
+    \item We know that any binary search (with m elements) has a time complexity of $O(\log m)$ as the algorithm keeps on reducing the array size by half in each go.
+    \item So, the overall algorithm will have the complexity of $O(\log(3n) \cdot 3 \log(n))$ which reduces to  $O(\log^2 n)$.
+\end{enumerate}
 The $O(\log^2 n)$ time complexity implies that the algorithm efficiently finds the $k$-th smallest element with significantly reduced computational effort compared to linear search methods.
 
 \section{Pseudocode}
@@ -68,15 +67,15 @@ The $O(\log^2 n)$ time complexity implies that the algorithm efficiently finds t
 
     \vspace{0.5cm}
 
-    \Function{KthSmallestElement}{$A, B, C, k$}
+    \Function{KthSmallestElement}{$A, B, C, k,3n$}
         \State $low \gets \min(A[0], B[0], C[0])$
         \State $high \gets \max(A[n-1], B[n-1], C[n-1])$
         
         \While{$low < high$}
             \State $mid \gets low + (high - low) / 2$
-            \State $a\_count \gets$ \Call{recursiveBinarySearchCount}{$A, mid, 0, \text{size of } A - 1$}
-            \State $b\_count \gets$ \Call{recursiveBinarySearchCount}{$B, mid, 0, \text{size of } B - 1$}
-            \State $c\_count \gets$ \Call{recursiveBinarySearchCount}{$C, mid, 0, \text{size of } C - 1$}
+            \State $a\_count \gets$ \Call{recursiveBinarySearchCount}{$A, mid, 0, \text{n} - 1$}
+            \State $b\_count \gets$ \Call{recursiveBinarySearchCount}{$B, mid, 0, \text{n} - 1$}
+            \State $c\_count \gets$ \Call{recursiveBinarySearchCount}{$C, mid, 0, \text{n} - 1$}
             \State $total\_count \gets a\_count + b\_count + c\_count$
             
             \If{$total\_count < k$}
@@ -115,5 +114,11 @@ Now, let's consider the correctness of the algorithm:
    - The while loop terminates when $low$ and $high$ converge. At this point, $low$ represents the $k$-th smallest element in $A'$. The algorithm correctly identifies the $k$-th smallest element within the sorted union of arrays.
 \\\\
 Therefore, the algorithm is correct and efficiently finds the $k$-th smallest element in the union of three sorted arrays.
+\\\\
+DEMO TESTCASE 1: A=[2,3,6] B=[1,5,8] C=[4,7,9]; n=3; k=2
+\\
+OUTPUT: 2
+\\
+EXPLANATION: The first binary search runs in the range [1,9]. We keep on finding the values for totalCount till we reach the desired k value. We will return low which will be equal to 2.
 
 \end{document}
