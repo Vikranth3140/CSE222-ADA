@@ -6,7 +6,7 @@
 
 using namespace std;
 
-bool canAchieveSum(const vector<int>& array, int x) {
+bool sum_coming(const vector<int>& array, int x) {
     int maxStat = *max_element(array.begin(), array.end());
     int minStat = *min_element(array.begin(), array.end());
     int mid = floor((maxStat + minStat) / 2);
@@ -48,7 +48,7 @@ int main() {
         for (int k = 0; k < q; ++k) {
             int a;
             cin >> a;
-            bool result = canAchieveSum(array, a);
+            bool result = sum_coming(array, a);
             results.push_back(result ? "Yes" : "No");
         }
     }
