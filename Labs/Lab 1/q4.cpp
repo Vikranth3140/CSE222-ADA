@@ -7,36 +7,42 @@
 using namespace std;
 
 bool sum_coming(const vector<int>& array, int x) {
-    int maxStat = *max_element(array.begin(), array.end());
-    int minStat = *min_element(array.begin(), array.end());
-    int mid = floor((maxStat + minStat) / 2);
+    int max = *max_element(array.begin(), array.end());
+    int min = *min_element(array.begin(), array.end());
+    int mid = floor((max + min) / 2);
 
-    vector<int> leftArray, rightArray;
+    vector<int> left_array, right_array;
     for (int stat : array) {
         if (stat <= mid) {
-            leftArray.push_back(stat);
+            left_array.push_back(stat);
         } else {
-            rightArray.push_back(stat);
+            right_array.push_back(stat);
         }
     }
 
-    int leftSum = accumulate(leftArray.begin(), leftArray.end(), 0);
-    int rightSum = accumulate(rightArray.begin(), rightArray.end(), 0);
+    int left_sum = accumulate(left_array.begin(), left_array.end(), 0);
+    int right_sum = accumulate(right_array.begin(), right_array.end(), 0);
 
-    if (leftSum == x || rightSum == x || leftSum + rightSum == x) {
+    if (left_sum == x || right_sum == x || left_sum + right_sum == x) {
         return true;
     } else {
         return false;
     }
+
+    // if (left_sum != x && right_sum != x && left_sum + right_sum != x) {
+    //     return false;
+    // } else {
+    //     return true;
+    // }
 }
 
 int main() {
-    int t;
-    cin >> t;
+    int no;
+    cin >> no;
 
     vector<string> results;
 
-    for (int i = 0; i < t; ++i) {
+    for (int i = 0; i < no; ++i) {
         int n, q;
         cin >> n >> q;
 
