@@ -1,16 +1,23 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-#include <numeric>
+#include <cmath>
 
 using namespace std;
 
-bool canAchieveSum(const vector<int>& array, int x) {
+bool canAchieveSum(vector<int>& array, int x) {
     int maxStat = *max_element(array.begin(), array.end());
     int minStat = *min_element(array.begin(), array.end());
-    int mid = (maxStat + minStat) / 2;
+
+    if (maxStat == minStat) {
+        return minStat == x;
+    }
+
+    int mid = floor((maxStat + minStat) / 2);
 
     vector<int> leftArray, rightArray;
+
+    // Separate elements into left and right arrays
     for (int stat : array) {
         if (stat <= mid) {
             leftArray.push_back(stat);
@@ -19,8 +26,24 @@ bool canAchieveSum(const vector<int>& array, int x) {
         }
     }
 
-    int leftSum = accumulate(leftArray.begin(), leftArray.end(), 0);
-    int rightSum = accumulate(rightArray.begin(), rightArray.end(), 0);
+    int leftSum = 0, rightSum = 0;
+
+    // Calculate leftSum using a loop
+    for (int stat : leftArray) {
+        leftSum += stat;
+    }
+
+    // Calculate rightSum using a loop
+    for (int stat : rightArray) {
+        rightSum += stat;
+    }
+
+    // Clear elements greater than mid
+    for (int i = array.size() - 1; i >= 0; --i) {
+        if (array[i] > mid) {
+            array.erase(array.begin() + i);
+        }
+    }
 
     if (leftSum == x || rightSum == x || leftSum + rightSum == x) {
         return true;
