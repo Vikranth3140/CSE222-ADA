@@ -1,6 +1,9 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <cmath>
+
+
 using namespace std;
 
 bool friendly_stat(int left, int right, int target, const vector<int>& pokemon) {
@@ -9,7 +12,7 @@ bool friendly_stat(int left, int right, int target, const vector<int>& pokemon) 
     }
 
     int mid = (pokemon[right] + pokemon[left]) / 2;
-    int mid_index = (left + right) / 2;
+    int mid_index = floor((left + right) / 2);
 
     int left_sum = 0, right_sum = 0, total_sum = 0;
 
