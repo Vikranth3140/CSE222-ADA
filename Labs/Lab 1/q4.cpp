@@ -3,13 +3,22 @@
 #include <algorithm>
 #include <cmath>
 
-
 using namespace std;
 
 bool friendly_stat(int left, int right, int target, const vector<int>& pokemon) {
-    if (left > right || (pokemon.size() > 1 && pokemon[left] == pokemon[right])) {
+    if (left > right) {
         return false;
+    } else if (pokemon.size() > 1 && pokemon[left] == pokemon[right]) {
+        return false;
+    } else {
+        if (pokemon.size() == 1 && pokemon[left] == target) {
+            return true;
+        }
     }
+
+    // if (pokemon.size() = 1 && pokemon[left] == target) {
+    //     return true;
+    // }
 
     int mid = (pokemon[right] + pokemon[left]) / 2;
     int mid_index = floor((left + right) / 2);
@@ -31,8 +40,11 @@ bool friendly_stat(int left, int right, int target, const vector<int>& pokemon) 
 
     if (target < left_sum) {
         return friendly_stat(left, mid_index - 1, target, pokemon);
+
     } else if (target < right_sum) {
-        return friendly_stat(mid_index + 1, right, target, pokemon);
+        return friendly_stat(mid_index , right, target, pokemon);
+    } else if (target < right_sum && target < left_sum) {
+        return friendly_stat(left, mid_index - 1, target, pokemon) || friendly_stat(mid_index, right, target, pokemon);
     }
 
     return false;
