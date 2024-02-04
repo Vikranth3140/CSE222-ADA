@@ -52,6 +52,7 @@ int main() {
         for (int i = 0; i < n; i++) {
             cin >> pokemon[i];
         }
+
         sort(pokemon.begin(), pokemon.end());
 
         for (int i = 0; i < q; i++) {
