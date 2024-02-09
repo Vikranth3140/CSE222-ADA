@@ -1,0 +1,138 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[margin=2.2cm]{geometry}
+
+\title{Theory Assignment-2: ADA Winter-2024}
+\author{Vikranth Udandarao (2022570) \and Ansh Varshney (2022083)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing}
+% You can write any preprocessing steps here, if applicable.
+
+\section{Algorithm Description}
+% Here you can provide a brief description of the algorithm used.
+
+We use dynamic programming to solve the problem efficiently. The algorithm navigates through the obstacle course, considering the maximum number of chickens Mr. Fox can earn while adhering to the given rules. 
+
+\section{Recurrence Relation}
+% Define the recurrence relation here.
+
+Let $DP[i][j][k]$ represent the maximum number of chickens Mr. Fox can earn up to booth $i$, where
+
+\begin{itemize}
+    \item $i$: Booth number.
+    \item $j$: Last action taken by Mr. Fox (0 for "RING", 1 for "DING").
+    \item $k$: Count of consecutive same actions taken by Mr. Fox (1 to 3)
+
+\end{itemize}
+
+The recurrence relation is
+
+
+\[DP[i][j][k] = \max\left(DP[i-1][j][k+1] + \text{{reward or penalty for action \(j\) at booth \(i\)}}, DP[i-1][1-j][1] + \text{{reward or penalty for action \(j\) at booth \(i\)}}\right)\]
+
+
+\section{Complexity Analysis}
+% Discuss the time complexity of the algorithm.
+
+The time complexity of the algorithm is $O(n)$, where $n$ is the number of booths. This is because we iterate over each booth once and perform constant-time operations for each booth. Therefore, the algorithm's running time is polynomial in the size of the input array $A$.
+
+\section{Pseudocode}
+% Provide the pseudocode of the algorithm.
+
+\begin{algorithm}
+\caption{Compute Maximum Chickens Earned}
+\begin{algorithmic}[1
+
+\Function{MaxChickens}{$A$}
+    \State $n \gets \text{length}(A)$
+    \State Initialize $DP$ table of size $n \times 2 \times 3$
+    \State $DP[1][0][1] \gets \max(A[1], 0)$
+    \State $DP[1][1][1] \gets \max(-A[1], 0)$
+    
+    \For{$k \gets 2$ \textbf{to} $n$}
+        \For{$\text{action} \gets 0$ \textbf{to} $1$}
+            \For{$\text{count} \gets 1$ \textbf{to} $3$}
+                \State $reward\_penalty \gets$ calculate reward or penalty
+                \If{$\text{count} < 3$}
+                    \State $DP[k][\text{action}][\text{count}] \gets \max(DP[k-1][\text{action}][\text{count}+1] + reward\_penalty, DP[k-1][1-\text{action}][1] + reward\_penalty)$
+                \Else
+                    \State $DP[k][\text{action}][\text{count}] \gets DP[k-1][1-\text{action}][1] + reward\_penalty$
+                \EndIf
+            \EndFor
+        \EndFor
+    \EndFor
+    
+    \State \Return $\max(DP[n][0][1], DP[n][1][1])
+
+\EndFunction
+\end{algorithmic}
+\end{algorithm}
+
+\section{Proof of Correctness}
+% You can provide the proof of correctness here, if necessary.
+
+
+
+
+
+\section{Subproblem Definition}
+
+Define the subproblem as follows:
+
+
+\[ DP[i][j][k] \]
+
+
+represents the maximum number of chickens Mr. Fox can earn up to booth $i$, where
+
+\begin{itemize}
+    \item $i$ is the booth number.
+    \item $j$ represents the last action taken by Mr. Fox (0 for "RING" and 1 for "DING").
+    \item $k$ represents the count of consecutive same actions taken by Mr. Fox (from 1 to 3)
+
+\end{itemize}
+
+\section{Recurrence of the Subproblem}
+
+The recurrence relation is as follows:
+
+
+\[ DP[i][j][k] = \max\left(DP[i-1][j][k+1] + \text{{reward or penalty for action $j$ at booth $i$}}, DP[i-1][1-j][1] + \text{{reward or penalty for action $j$ at booth $i$}}\right) \]
+
+
+Where
+
+\begin{itemize}
+    \item $DP[i-1][j][k+1]$ represents the maximum number of chickens earned if Mr. Fox continues the same action at booth $i$ (increasing the count).
+    \item $DP[i-1][1-j][1]$ represents the maximum number of chickens earned if Mr. Fox switches the action at booth $i$ (resetting the count)
+
+\end{itemize}
+
+\section{Specific Subproblem(s) to Solve the Actual Problem}
+
+The specific subproblem to solve the actual problem is $DP[n][0][1]$ or $DP[n][1][1]$, which represents the maximum number of chickens earned by Mr. Fox after visiting all booths.
+
+\section{Algorithm Description}
+
+\begin{enumerate}
+    \item Initialize a DP table of size $n \times 2 \times 3$ with appropriate initial values.
+    \item Iterate over booths from 2 to $n$ and over actions (0 for "RING" and 1 for "DING") and counts from 1 to 3.
+    \item Calculate the maximum chickens earned at each booth based on the recurrence relation.
+    \item The maximum number of chickens earned is the maximum value in the last row of the DP table
+
+\end{enumerate}
+
+\section{Explanation of the Running Time}
+
+The time complexity of the algorithm is $O(n)$, where $n$ is the number of booths. This is because we iterate over each booth once and perform constant-time operations for each booth. Therefore, the algorithm's running time is polynomial in the size of the input array $A$.
+
+\end{document}
