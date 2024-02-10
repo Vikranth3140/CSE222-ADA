@@ -8,11 +8,9 @@ int check(vector<int> & nums, int ind, int rc, int dc, vector<vector<vector<int>
     if (ind == 0) {
         if (rc == 3) {
             return -nums[ind];
-        }
-        if (dc == 3) {
+        } else if (dc == 3) {
             return nums[ind];
-        }
-        if (nums[ind] > 0) {
+        } else if (nums[ind] > 0) {
             return nums[ind];
         } else if (nums[ind] < 0) {
             return -nums[ind];
@@ -21,8 +19,10 @@ int check(vector<int> & nums, int ind, int rc, int dc, vector<vector<vector<int>
     if (dp[ind][rc][dc] != INT_MIN) {
         return dp[ind][rc][dc];
     }
+
     int ring = INT_MIN;
     int ding = INT_MIN;
+
     if (rc == 3) {
         ding = check(nums, ind - 1, 0, 1, dp) - nums[ind];
     } else if (dc == 3) {
