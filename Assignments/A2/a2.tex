@@ -14,73 +14,144 @@
 
 \maketitle
 
-\section{Preprocessing}
-    No preprocessing is needed for this algorithm.
+
+\section{Preprocessing and Assumptions}
+    In this problem, no specific preprocessing steps are required. We assume or have been given the following:
+
+    \begin{enumerate}
+        \item The array consists of n integers with 0-based indexing.
+        \item Mr. Fox can either say RING or DING.
+        \item Mr. Fox is forbidden to say the same word more than three times a row.
+        \item All the account are settled in the end after Mr. Fox visits each booth in order and "Hot Box" is called, without the need for him to physically carry chickens, i.e. he visits each index exactly once.
+        \item Size of array is greater than equal to 1.
+        \item The array given to us is nums and it can have any value (positive, negative or zero).
+    \end{enumerate}
+
 
 \section{Algorithm Description}
-    The algorithm uses dynamic programming to find the maximum sum that can be obtained by choosing a subset of elements from the given array $\text{nums}$. It maintains a three-dimensional dynamic programming table $\text{dp}$, where $\text{dp}[i][rc][dc]$ represents the maximum sum achievable up to index $i$ considering $rc$ consecutive positive numbers at the end and $dc$ consecutive negative numbers at the end. The algorithm iterates through the array, updating the $\text{dp}$ table based on the current element and the states of consecutive positive and negative numbers.
+    The algorithm uses dynamic programming to find the maximum sum that can be obtained by choosing a subset of elements from the given array $\text{nums}$. It maintains a three-dimensional dynamic programming table $\text{dp}$, where $\text{dp}[i][rc][dc]$ represents the maximum sum achievable up to index $i$ considering $rc$ consecutive \textit{ring} and $dc$ consecutive \textit{ding} numbers for each index.
+
+    The algorithm uses recursion (memoization) to implement this logic. It starts from index $n-1$ and then reaches to the index $0$ (base case) recursively. In each recursive call, it checks that $rc$ and $dc$ do not exceed $3$. For each index, the algorithm considers all possible cases (ring, ding) and then returns the maximum possible value that can be obtained till that index. Additionally, it stores this value in the dp array so that it does not have to recalculate it if needed in the recursion ahead.
+
 
 \section{Subproblem Definition}
-    The subproblem is defined as finding the maximum sum achievable up to index $i$ considering $rc$ consecutive positive numbers at the end and $dc$ consecutive negative numbers at the end.
+    The subproblem for index $\text{ind}$ is defined as finding the maximum sum achievable starting from index $\text{0}$ to index $\text{ind}$, such that neither ring nor ding is called more than $\text{3}$ times consecutively till $\text{ind}$. The dp[ind][rc][dc] will basically store the maximum sum that can be obtained till index $\text{ind}$ with ring called $\text{rc}$ consecutive times and ding called $\text{dc}$ consecutive times just before this index. The function CHECK(ind) returns the maximum sum that can be obtained from index 0 to ind in nums.
+
 
 \section{Recurrence of the Subproblem}
-    Let $\text{dp}[i][rc][dc]$ denote the maximum sum achievable up to index $i$ considering $rc$ consecutive positive numbers at the end and $dc$ consecutive negative numbers at the end. The recurrence relation is as follows:
 
-\[
-\text{dp}[i][rc][dc] = \max\left\{
-    \begin{array}{ll}
-        \text{dp}[i-1][rc+1][0] + \text{nums}[i], & \text{// Consider } \text{nums}[i] \text{ as a positive number} \\
-        \text{dp}[i-1][0][dc+1] - \text{nums}[i], & \text{// Consider } \text{nums}[i] \text{ as a negative number}
-    \end{array}
-\right\}
-\]
+    The recurrence relation of the subproblem in this dynamic programming algorithm can be expressed as follows:
+    Let $\text{dp}[i][rc][dc]$ denote the maximum sum achievable up to index $i$ considering $rc$ consecutive RING before the index and $dc$ consecutive DING before the index. Then, the recurrence relation is (when rc and dc both are less than 3):
 
-\section{Specific Subproblem(s) to Solve the Actual Problem}
-    The specific subproblem to solve the actual problem is $\text{dp}[n-1][0][0]$, where $n$ is the size of the $\text{nums}$ array. It represents the maximum sum achievable considering all elements of $\text{nums}$ with no consecutive positive or negative numbers at the end.
+    \begin{equation*}
+    \text{dp}[i][rc][dc] = \max \left\{
+        \begin{array}{ll}
+            \text{dp}[i-1][rc+1][0] + \text{nums}[i], & \text{if } \text{RING} \\
+            \text{dp}[i-1][0][dc+1] - \text{nums}[i], & \text{if } \text{DING}
+        \end{array}
+    \right\}
+    \end{equation*}
+
+    For the case when $\text{rc}$ equals $\text{3}$:
+    \text{dp}[i][rc][dc]= dp[i-1][0][1]-nums[ind]
+    
+    For the case when $\text{dc}$ equals $\text{3}$:
+    \text{dp}[i][rc][dc]= dp[i-1][1][0]+nums[ind]
+
+    This recurrence relation represents the maximum sum achievable at index $i$ with different configurations of consecutive RINGs and DINGs till the index, while considering the reward or penalty associated with the current booth (indexed by $i$).
+
+
+\section{Specific Subproblem to Solve the Actual Problem}
+    The specific subproblem to solve the actual problem is $\text{dp}[n-1][0][0]$, where $n$ is the size of the $\text{nums}$ array. It represents the maximum sum achievable considering all elements of $\text{nums}$ with no more than three consecutive ring or ding operations throughout.
+
+
+\section{Pseudocode}
+\begin{algorithm}
+\caption{Function to Find Maximum Number of Chickens}
+\begin{algorithmic}[1]
+
+\Function{check}{$\text{nums}, \text{ind}, \text{rc}, \text{dc}, \text{dp}$}
+    \If{$\text{ind} == 0$}
+        \If{$\text{rc} == 3$}
+            \State \textbf{return} $-\text{nums[ind]}$ \Comment{Base case if three consecutive rings}
+        \ElsIf{$\text{dc} == 3$}
+            \State \textbf{return} $\text{nums[ind]}$ \Comment{Base case if three consecutive dings}
+        \ElsIf{$\text{nums[ind]} > 0$}
+            \State \textbf{return} $\text{nums[ind]}$ \Comment{Positive reward}
+        \ElsIf{$\text{nums[ind]} < 0$}
+            \State \textbf{return} $-\text{nums[ind]}$ \Comment{Negative penalty}
+        \EndIf
+    \EndIf
+    \If{$\text{dp[ind][rc][dc]} \neq \text{INT\_MIN}$} \Comment{Check and return if already computed}
+        \State \textbf{return} $\text{dp[ind][rc][dc]}$
+    \EndIf
+    \State $\text{ring} \gets \text{INT\_MIN}$ \Comment{Initialize variables}
+    \State $\text{ding} \gets \text{INT\_MIN}$
+    \If{$\text{rc} == 3$}
+        \State $\text{ding} \gets \text{check(nums, ind - 1, 0, 1, dp) - nums[ind]}$ \Comment{Compute ding}
+    \ElsIf{$\text{dc} == 3$}
+        \State $\text{ring} \gets \text{check(nums, ind - 1, 1, 0, dp) + nums[ind]}$ \Comment{Compute ring}
+    \Else
+        \State $\text{ring} \gets \text{check(nums, ind - 1, rc + 1, 0, dp) + nums[ind]}$ \Comment{Compute ring}
+        \State $\text{ding} \gets \text{check(nums, ind - 1, 0, dc + 1, dp) - nums[ind]}$ \Comment{Compute ding}
+    \EndIf
+    \State $\text{dp[ind][rc][dc]} \gets \max(\text{ring}, \text{ding})$ \Comment{Store maximum value}
+    \State \textbf{return} $\max(\text{ring}, \text{ding})$ \Comment{Return maximum value}
+\EndFunction
+
+\vspace{0.5cm}
+
+\Function{main}{}
+    \State $n \gets \text{size of nums}$
+    \State $\text{a} \gets \text{2D array of integers with dimensions } (4, 4) \text{ initialized with INT\_MIN}$
+    \State $\text{dp} \gets \text{3D array of integers with dimensions } (n, 4, 4) \text{ initialized with a}$
+    \State \textbf{print} \textsc{check(nums, n - 1, 0, 0, dp)}
+\EndFunction
+
+\end{algorithmic}
+\end{algorithm}
+
 
 \section{Complexity Analysis}
     \subsection{Time Complexity}
-        The algorithm iterates through the array once, and for each element, it updates the dynamic programming table in constant time. Thus, the time complexity is $O(n)$, where $n$ is the size of the input array.
+         The time complexity is $O(n)$, where $n$ is the size of the input array. If memoization was not employed, the recursive relation had time complexity of order O(\(2^n\)). This could be shown using a recurrence tree. However, since we are storing repeated values in the dp array, we will not be calculating redundant values and this will reduce the complexity to O(n). Note that we cannot use recurrence relation to prove time complexity in memoization.
 
     \subsection{Space Complexity}
         The algorithm uses a three-dimensional dynamic programming table of size $O(n \times 4 \times 4)$, where $n$ is the size of the input array. Hence, the space complexity is $O(n)$.
-    
+
+
+\section{Explanation of the Running Time Complexity}
+    The space complexity is O(n) as shown above. The time complexity can be proven as O(n) by the following argument:
+    \\
+    The algorithm processes each booth in the array once, and at each booth, it computes the maximum chickens earned considering the current booth and the previously visited booths.
+    \\
+    First, the algorithm initializes the memoization table dp which is done in O(1) time.
+    Then, the algorithm performs constant time work to compute the maximum chickens earned for each booth, based on the previous booths' results stored in the memoization table. This process involves a constant number of lookups in the memoization table and comparisons to update the maximum value. Since there are n booths, time complexity for this operation is O(n).
+    Lastly, the algorithm retrieves the maximum value from the memoization table in O(1) time.
+    \\
+    So, the total time complexity will be O(n) + O(1) + O(1) which is O(n) only.
+
+
 \section{Proof of Correctness}
-    The correctness of the algorithm can be proved by induction on the indices of the array. The base case (index 0) is trivially correct. For the inductive step, assuming that the algorithm correctly computes the maximum sum up to index $i-1$, we prove that it also correctly computes the maximum sum up to index $i$. This can be done by considering all possible cases for the current element at index $i$ (positive, negative) and updating the dynamic programming table accordingly.
 
-\section{Pseudocode}
-    \begin{algorithm}
-    \caption{Function to Find Maximum Subset Sum}
-        \begin{algorithmic}[1]
+\textbf{Proof of Correctness by Induction:}
 
-            \Function{maxSubsetSum}{$\text{nums}$}
-                \State $n \gets \text{size}(\text{nums})$
-                \State $dp \gets \text{create 3D array of size} (n, 4, 4) \text{ filled with } \text{INT\_MIN}$
-                \State $dp[0][0][0] \gets \text{nums}[0]$  \Comment{Base case}
-                \For{$i \gets 1$ \textbf{to} $n-1$}
-                    \For{$rc \gets 0$ \textbf{to} $3$}
-                        \For{$dc \gets 0$ \textbf{to} $3$}
-                            \State $ring \gets \text{INT\_MIN}$
-                            \State $ding \gets \text{INT\_MIN}$
-                            \If{$rc == 3$}
-                                \State $ding \gets dp[i-1][0][dc+1] - \text{nums}[i]$
-                            \ElsIf{$dc == 3$}
-                                \State $ring \gets dp[i-1][rc+1][0] + \text{nums}[i]$
-                            \Else
-                                \State $ring \gets dp[i-1][rc+1][0] + \text{nums}[i]$
-                                \State $ding \gets dp[i-1][0][dc+1] - \text{nums}[i]$
-                            \EndIf
-                            \State $dp[i][rc][dc] \gets \max(ring, ding)$
-                        \EndFor
-                    \EndFor
-                \EndFor
-                \State \textbf{return} $\max(dp[n-1][0][0], 0)$
+\textbf{Base Step (n = 1):}
+The algorithm correctly handles the base case where there's only one booth, returning the reward if positive or the negative penalty if negative.
 
-                \EndFunction
-        \end{algorithmic}
-    \end{algorithm}
+\textbf{Inductive Hypothesis:}
+Assume the algorithm correctly computes the maximum chickens earned for an array of length $k$, where $k \leq n$.
 
-\section{Explanation of the Running Time}
-    The algorithm iterates through the array once, performing constant-time operations for each element. Therefore, the time complexity is $O(n)$. Additionally, the algorithm uses a three-dimensional dynamic programming table of size $O(n \times 4 \times 4)$, resulting in a space complexity of $O(n)$.
+\textbf{Inductive Step:}
+We need to show the algorithm correctly computes the maximum chickens earned for an array of length $k + 1$.
+For the $(k+1)$-th booth, if he said RING three times consecutively before, he must say DING at this booth. Otherwise, he can say RING, earning $M[k] + A[k+1]$ chickens. If he said DING three times consecutively before, he must say RING at this booth. Otherwise, he can say DING, earning $M[k] - A[k+1]$ chickens.
+The maximum value out of both of these will be chosen, ensuring the correct computation of the maximum chickens earned for an array of length $k + 1$.
+Thus, by induction, the algorithm correctly computes the largest number of chickens Mr. Fox can earn for an array of length $n$.
+
+\textbf{SAMPLE TESTCASE:}
+$n=10$, $\text{nums}=[2, 4, 5, 6, -3, -7, 1, -4, 5, -7]$
+
+\textbf{OUTPUT:} $40$
+
 
 \end{document}
