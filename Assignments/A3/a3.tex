@@ -1,0 +1,139 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[margin=2.2cm]{geometry}
+
+\title{Theory Assignment-3: ADA Winter-2024}
+\author{Vikranth Udandarao (2022570) \and Ansh Varshney (2022083)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+
+\section{Preprocessing and Assumptions}
+    In this problem, we preprocess, assume or have been given the following:
+
+    \begin{enumerate}
+        \item We preprocess the input data to parse the dimensions of the marble slab and the spot prices of various marble rectangles.
+        \item We assume the input dimensions of the marble slab are positive integers.
+        \item We assume the spot prices of marble rectangles are provided in a 2D array, with each element representing the price of a specific rectangle size.
+        \item We assume all input values are valid and within the constraints of the problem
+        \item The marble slab is a rectangle measuring n centimeters in height and m centimeters in width.
+        \item At any time, you can query the spot price P[x, y] by an x cm by y cm marble rectangle in O(1)-time, for any positive integers x and y.
+    
+    \end{enumerate}
+
+
+\section{Algorithm Description}
+    The algorithm aims to maximize profit by dividing the marble slab into smaller rectangles of integral pieces while considering the spot prices of different-sized rectangles. It utilizes dynamic programming to solve the problem efficiently. For each sub-rectangle (say of size axb), we consider three possibilities: divide the rectangle into two rectangles by horizontal cutting, divide the rectangle into two rectangles by vertical cutting, or not cutting the rectangle further. The maximum cost is taken out for all these cases (by looking at the prices grid given) and it becomes the optimal cost for the rectangle with size axb. In the algorithm, we have made a 2D dp array that has the dimensions (m+1)x(n+1). Each entry dp[a][b] stores the maximum cost that can be obtained from a rectangle of dimensions axb. We have initially filled the dp with all elements as 0, then for each row (i=1 to m) and each column (j=1 to j=n), we fill the table using the Table Filling (Tabulation) method, i.e. by visiting the previous values of the dp array and writing down the maximum. At the end, we return dp[m][n] which will be the maximum cost obtained for our original rectangle of dimensions mxn.
+
+
+\section{Subproblem Definition}
+    The subproblem in this context involves determining the maximum profit achievable from a marble slab of dimensions $i \times j$. Let $dp[i][j]$ represent the maximum profit that can be obtained from such a marble slab.
+
+
+\section{Recurrence of the Subproblem}
+
+    \begin{equation*}
+        \text{The recurrence relation for } dp[i][j] \text{ is defined as follows:}
+    \end{equation*}
+        \begin{equation*}
+        \begin{aligned}
+        dp[i][j] = \max(&\text{spot price of } i \times j \text{ rectangle}, \\
+        &\max_{k=1}^{i-1}(dp[k][j] + dp[i-k][j]), \\
+        &\max_{k=1}^{j-1}(dp[i][k] + dp[i][j-k])
+    \end{aligned}
+    \end{equation*}
+    
+    This recurrence considers the maximum of profit achieved by not cutting the slab, the profit achievable by making horizontal cuts, and the profit achieved by vertical cuts at different positions.
+
+
+\section{Specific Subproblem to Solve the Actual Problem}
+    The specific subproblem we aim to solve is finding $dp[m][n]$, which corresponds to the maximum profit achievable from the original marble slab of dimensions $m \times n$. By solving this specific subproblem, we effectively determine the optimal way to subdivide the entire marble slab to maximize our profit. This involves considering all possible ways to make horizontal and vertical cuts to partition the slab into smaller integral pieces, while also taking into account the spot prices of each resulting rectangle. The algorithm aims to systematically explore these possibilities and determine the configuration that yields the highest profit.
+
+
+\section{Pseudocode}
+    \begin{algorithm}
+    \caption{MaximizeProfitMarbleSlab}
+    \begin{algorithmic}[1]
+    
+    \Function{MaximizeProfit}{$m, n, P$} \Comment{P: Profit array, m: length, n: width of rectangle}
+        \State Initialize $dp[m+1][n+1]$ as a 2D array with all elements initialized to $0$
+        \For{$i \gets 1$ to $m$}  \Comment{Iterate over rows}
+            \For{$j \gets 1$ to $n$}  \Comment{Iterate over columns}
+                \State $hori \gets 0$, $vert \gets 0$, $nocut \gets P[i-1][j-1]$  \Comment{Initialize horizontal, vertical, and no-cut profit}
+                \For{$k \gets 1$ to $i$}  \Comment{Iterate over possible horizontal cuts}
+                    \State $hori \gets \max(hori, dp[k][j] + dp[i-k][j])$  \Comment{Update horizontal profit}
+                \EndFor
+                \For{$k \gets 1$ to $j$}  \Comment{Iterate over possible vertical cuts}
+                    \State $vert \gets \max(vert, dp[i][k] + dp[i][j-k])$  \Comment{Update vertical profit}
+                \EndFor
+                \State $dp[i][j] \gets \max(nocut, \max(hori, vert))$  \Comment{Choose maximum profit among no-cut, horizontal cut, and vertical cut}
+            \EndFor
+        \EndFor
+        \State \Return $dp[m][n]$  \Comment{Return maximum profit for given dimensions}
+    \EndFunction
+
+\end{algorithmic}
+\end{algorithm}
+
+
+\section{Complexity Analysis}
+    \subsection{Time Complexity}
+    The time complexity of the algorithm is $O((mn)^2)$ (polynomial in $O(m+n)$), where $m$ and $n$ are the dimensions of the marble slab. This is because there are two nested loops iterating over the dimensions of the slab, and within each iteration, there are two additional loops iterating over the possible cut positions.
+    
+    \subsection{Space Complexity}
+    The space complexity of the algorithm is $O(mn)$, as we use a 2D array of size $(m+1) \times (n+1)$ to store the maximum profits.
+
+
+\section{Explanation of the Running Time Complexity}
+    The running time complexity of the algorithm arises from the nested loops iterating over the dimensions of the marble slab, i.e. the first loop iterates from i=1 to m, nested with this loop, the second loop runs from j=1 to n. Also, there are further two loops nested (each individually nested) with the original loops. They are required to iterate over all possible cut positions. This results in a quadratic time complexity of $O((mn)^2)$.
+
+
+\section{Proof of Correctness}
+
+    \textbf{Proof of Correctness by Induction:}
+
+    \textbf{Base Step ($n = 1$):}
+    For the base case, we consider a marble slab of dimensions $1 \times 1$. In this case, there's only one small rectangle, and the maximum profit is simply the spot price of this rectangle. The algorithm correctly initializes the $dp$ array and returns the spot price of the $1 \times 1$ rectangle, which is the correct result.
+
+    \textbf{Inductive Hypothesis:}
+    Assume that the algorithm produces the correct result for all inputs up to size $n \times m$.
+    
+    \textbf{Inductive Step:}
+    We want to show that it also produces the correct result for input size $(n+1) \times (m+1)$.
+    
+    The algorithm iterates through all possible subproblems, considering different ways to cut the marble slab. For each subproblem $dp[i][j]$, it computes the maximum profit achievable. By the inductive hypothesis, we assume that the algorithm correctly computes the maximum profit for all smaller subproblems.
+    
+    Now, we need to show that considering all possible cuts and maximizing the profit indeed yields the correct result. We can do this by showing that the recurrence relation used in the algorithm correctly captures the optimal solution:
+    
+    The recurrence relation considers three cases:
+    1. Not cutting the slab at all and taking the spot price of the whole slab.
+    2. Making horizontal cuts at different positions and considering the maximum profit achievable by adding the profits of the two resulting subproblems.
+    3. Making vertical cuts at different positions and considering the maximum profit achievable by adding the profits of the two resulting subproblems.
+
+    By considering all possible cuts and maximizing the profit in each case, the algorithm ensures that the maximum profit for the $(n+1) \times (m+1)$ slab is correctly computed.
+
+    Therefore, by the principle of mathematical induction, the algorithm correctly computes the maximum profit for any given marble slab dimensions.
+
+    \textbf{SAMPLE TESTCASE:}
+
+    $m=2$, $n=3$, 
+
+    \[
+    \begin{array}{ccc}
+    2 & 4 & 1 \\
+    4 & 1 & 3 \\
+    \end{array}
+    \]
+
+    \textbf{OUTPUT:} $12$
+
+    Thus, the proof of correctness by induction is established.
+
+\end{document}
