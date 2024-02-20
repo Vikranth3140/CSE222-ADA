@@ -85,14 +85,14 @@
 
 \section{Complexity Analysis}
     \subsection{Time Complexity}
-    The time complexity of the algorithm is $O((mn)^2)$ (polynomial in $O(m+n)$), where $m$ and $n$ are the dimensions of the marble slab. This is because there are two nested loops iterating over the dimensions of the slab, and within each iteration, there are two additional loops iterating over the possible cut positions.
+    The time complexity of the algorithm is $O((mn)(m + n))$ (polynomial in $O(m+n)$), where $m$ and $n$ are the dimensions of the marble slab. This is because there are two nested loops iterating over the dimensions of the slab, and within each iteration, there are two additional loops iterating over the possible cut positions.
     
     \subsection{Space Complexity}
     The space complexity of the algorithm is $O(mn)$, as we use a 2D array of size $(m+1) \times (n+1)$ to store the maximum profits.
 
 
 \section{Explanation of the Running Time Complexity}
-    The running time complexity of the algorithm arises from the nested loops iterating over the dimensions of the marble slab, i.e. the first loop iterates from i=1 to m, nested with this loop, the second loop runs from j=1 to n. Also, there are further two loops nested (each individually nested) with the original loops. They are required to iterate over all possible cut positions. This results in a quadratic time complexity of $O((mn)^2)$.
+    The running time complexity of the algorithm arises from the nested loops iterating over the dimensions of the marble slab, i.e. the first loop iterates from i=1 to m, nested with this loop, the second loop runs from j=1 to n. Also, there are further two loops nested (each individually nested) with the original loops. They are required to iterate over all possible cut positions. This results in a quadratic time complexity of $O((mn)(m + n))$.
 
 
 \section{Proof of Correctness}
