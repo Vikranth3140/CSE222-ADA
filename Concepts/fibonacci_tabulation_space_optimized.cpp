@@ -1,7 +1,7 @@
 // Tabulation - Bottom Up Approach
 // Time Complexity is O(n).
-// Space Complexity is O(n).
-// Print the fibonacci using Tabulation.
+// Space Complexity is O(1).
+// Print the fibonacci using Tabulation and Optimizing Space.
 
 #include <iostream>
 #include <vector>
@@ -24,13 +24,14 @@ int main() {
     int n;
     cin >> n;
     vector<int> dp(n + 1, -1);
-    dp[0] = 0;
-    dp[1] = 1;
-    cout << fib(n, dp) << endl;
-    cout << "dp array: ";
-    for (int i = 0; i <= n; i++) {
-        cout << dp[i] << " ";
+    int prev2 = 0;
+    int prev = 1;
+    for(int i=2; i<=n; i++){
+        int cur_i = prev2+ prev;
+        prev2 = prev;
+        prev= cur_i;
     }
+    cout << prev;
     cout << endl;
     return 0;
 }
