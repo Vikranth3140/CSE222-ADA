@@ -1,0 +1,108 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage[margin=2.2cm]{geometry}
+
+\title{Theory Assignment-3: ADA Winter-2024}
+\author{Vikranth Udandarao (2022570) \and Ansh Varshney (2022083)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing and Assumptions}
+    In this problem, we preprocess, assume or have been given the following:
+
+    \begin{enumerate}
+        \item The graph $G = (V, E)$ is a directed acyclic graph (DAG).
+        \item Two vertices $s$ and $t$ are specified in the graph.
+        \item The graph has $n$ vertices and $m$ edges.
+    \end{enumerate}
+
+\section{Problem Formulation as a Graph Theoretic Problem}
+    We formulate the problem as finding all vertices that, when removed, disconnect the path from $s$ to $t$ in a directed acyclic graph (DAG). This can be represented by constructing a graph where vertices are the nodes of the original DAG and edges represent the dependencies between nodes. For example, in a project scheduling scenario, nodes represent tasks, and directed edges represent dependencies between tasks.
+
+    \textbf{Example:} Consider a graph $G$ with vertices $s, A, B, C,$ and $t$ such that $s \rightarrow A \rightarrow B \rightarrow C \rightarrow t$. Here, vertices $A, B,$ and $C$ are (s, t)-cut vertices as removing any of them disconnects the path from $s$ to $t$.
+
+\section{Subproblem Definition}
+    We define subproblems as follows:
+    \begin{itemize}
+        \item Topological sorting of the graph $G$.
+        \item Finding cut vertices using DFS traversal.
+    \end{itemize}
+
+\section{Recurrence of the Subproblem}
+    The recurrence for the subproblems can be described as follows:
+    \begin{itemize}
+        \item Topological sorting: $O(n + m)$ time complexity.
+        \item Finding cut vertices: $O(n + m)$ time complexity.
+    \end{itemize}
+
+\section{Specific Subproblem to Solve the Actual Problem}
+    The specific subproblem to solve the actual problem is finding all (s, t)-cut vertices.
+    
+\section{Pseudocode}
+    \begin{algorithm}
+        \caption{FindCutVertices($G$, $s$, $t$)}
+        \begin{algorithmic}[1]
+            \State Initialize $visited\_topo[n]$ and $adj[n]$
+            \State Initialize empty stack $st$
+                \For{$i$ from $0$ to $n-1$}
+                    \If{$visited\_topo[i] == 0$}
+                        \State TopologicalSort($i$, $st$, $visited\_topo$, $adj$)
+                    \EndIf
+                \EndFor
+                \State Initialize $start[n]$, $end[n]$, $cut\_nodes$
+                \While{$st$ is not empty}
+                    \State $node \gets$ top element of $st$
+                    \If{$start[node] == 0$}
+                        \State FindCutNodes($node$, $start$, $end$, $cut\_nodes$, $adj$)
+                    \EndIf
+                \EndWhile
+                \State \textbf{return} $cut\_nodes$
+        \end{algorithmic}
+    \end{algorithm}
+
+\section{Graph Traversal Algorithm}
+    We use a modified depth-first search (DFS) algorithm to find all (s, t)-cut vertices in the graph.
+
+        \subsection{DFS Algorithm Description}
+        The DFS algorithm is as follows:
+        \begin{enumerate}
+            \item Initialize a set or list to store cut vertices.
+            \item Perform a DFS traversal starting from vertex $s$.
+            \item During traversal, maintain discover time ($d[v]$), low time ($low[v]$), parent vertex ($parent[v]$), and isCut[v] flag.
+            \item When visiting a vertex $v$ during DFS:
+            \begin{itemize}
+                \item Update $d[v]$ and $low[v]$ to current time.
+                \item For each outgoing edge ($v, u$):
+                \begin{itemize}
+                    \item If $u$ is not visited, recursively visit $u$.
+                    \item Update $low[v]$ based on $low[u]$ after the recursive call.
+                    \item If $low[u] \geq d[v]$ and $v$ is not $s$, mark $v$ as a cut vertex.
+                \end{itemize}
+            \end{itemize}
+            \item After DFS, iterate through non-starting vertices $v$:
+            \begin{itemize}
+                \item If isCut[v] is true, add $v$ to the cut vertices set.
+            \end{itemize}
+        \end{enumerate}
+
+\section{Complexity Analysis}
+    \subsection{Time Complexity}
+        The time complexity of the algorithm is $O(n + m)$, where $n$ is the number of vertices and $m$ is the number of edges in the graph.
+
+    \subsection{Space Complexity}
+        The space complexity is $O(n)$ for storing visited nodes, adjacency lists, start and end arrays, and the stack.
+
+\section{Necessary and Sufficient Conditions}
+    The necessary and sufficient conditions for correctness are:
+    \begin{itemize}
+        \item If $low[u] \geq d[v]$ for a vertex $v$ and its child $u$, it implies that removing $v$ disconnects the path from $s$ to $t$, making $v$ a cut vertex.
+    \end{itemize}
+
+\end{document}
