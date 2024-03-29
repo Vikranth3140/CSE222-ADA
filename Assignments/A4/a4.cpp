@@ -12,11 +12,11 @@ void topological_sort(int node,stack<int> &st, vector<int> &visited,vector<int> 
     return
 }
 
-void cutNodeFinder(int node,vector<int> &start,vector<int> &end,vector<int> &cut_nodes,vector<int> adj[]){
+void findCutNodes(int node,vector<int> &start,vector<int> &end,vector<int> &cut_nodes,vector<int> adj[]){
     start[node]=1;
     for(auto i: adj[node]){
         if(start[i]==0){
-            cutNodeFinder(i,start,end,cut_nodes,adj);
+            findCutNodes(i,start,end,cut_nodes,adj);
         }
         else if(start[i]==1 && end[i]==0){
             cut_nodes.push_back(i);
@@ -48,7 +48,7 @@ int main(){
         int node=st.top();
         st.pop();
         if (start[node]==0){
-            cutNodeFinder(node,start,end,cut,adj);
+            findCutNodes(node,start,end,cut,adj);
         }
     }
 
