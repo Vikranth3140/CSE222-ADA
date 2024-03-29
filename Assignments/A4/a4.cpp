@@ -9,7 +9,7 @@ void topological_sort(int node,stack<int> &st, vector<int> &visited,vector<int> 
         }
     }
     st.push(node);
-    return
+    return;
 }
 
 void findCutNodes(int node,vector<int> &start,vector<int> &end,vector<int> &cut_nodes,vector<int> adj[]){
@@ -53,5 +53,5 @@ int main(){
     }
 
     // Cut_nodes stroes answer.
-    return 0
+    return 0;
 }
