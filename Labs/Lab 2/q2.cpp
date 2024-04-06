@@ -3,41 +3,36 @@
 
 const int MOD = 1e9+7;
 
-// Recursive function to calculate the count of valid subsequences
-int countSubsequences(int idx, int currentOR, int x, const std::vector<int>& numbers) {
-    // Base case: if we've considered all elements
-    if (idx == numbers.size()) {
-        return currentOR == x;
+int countSubsequences(int i, int current_OR, int x, const std::vector<int>& numbers) {
+    if (i == numbers.size()) {
+        return current_OR == x;
     }
     
-    // Include the current element in the OR
-    int include = countSubsequences(idx + 1, currentOR | numbers[idx], x, numbers);
+    int include = countSubsequences(i + 1, current_OR | numbers[i], x, numbers);
     
-    // Exclude the current element
-    int exclude = countSubsequences(idx + 1, currentOR, x, numbers);
+    int exclude = countSubsequences(i + 1, current_OR, x, numbers);
     
-    // Return the sum of both choices
     return (include + exclude) % MOD;
 }
 
 int main() {
     int Q;
+    // Here, we have to use std::cin because without using it I had got compilation error
     std::cin >> Q;
-    
+    // Here, we have to use std::vector because without using it I had got compilation error
     std::vector<int> numbers;
     
     while (Q--) {
         int M, x;
+        // Here, we have to use std::cin because without using it I had got compilation error
         std::cin >> M >> x;
         
         if (M == 1) {
-            // Mode 1: Store the number
             numbers.push_back(x);
         } else {
-            // Mode 2: Calculate and output the special key
+            // Here, we have to use std::cout because without using it I had got compilation error
             std::cout << countSubsequences(0, 0, x, numbers) << std::endl;
         }
     }
-    
     return 0;
 }
