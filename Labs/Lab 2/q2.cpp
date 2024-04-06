@@ -1,31 +1,28 @@
 #include <iostream>
 #include <vector>
-#include <unordered_map>
 
 const int MOD = 1e9 + 7;
-// Here, we have to use std::unordered_map because without using it I had got compilation error
-std::unordered_map<long long, int> memo;
 
-long long make_key(int i, int current_OR) {
-    return ((long long)i << 32) | current_OR;
-}
-
-int countSubsequences(int i, int current_OR, int x, const std::vector<int>& numbers) {
-    if (i == numbers.size()) {
-        return current_OR == x;
+// Dint use Memoization DP
+// Tried to use bitmasking as dynamic approach in previous submission gave time limit exceeded at test case 3
+int countValidSubsequences(int x, const std::vector<int>& numbers) {
+    int count = 0;
+    
+    for (int mask = 0; mask < (1 << numbers.size()); ++mask) {
+        int current_OR = 0;
+        
+        for (int i = 0; i < numbers.size(); ++i) {
+            if (mask & (1 << i)) {
+                current_OR |= numbers[i];
+            }
+        }
+        
+        if (current_OR == x) {
+            ++count;
+            count %= MOD;
+        }
     }
-    
-    long long key = make_key(i, current_OR);
-    if (memo.find(key) != memo.end()) {
-        return memo[key];
-    }
-    
-    int include = countSubsequences(i + 1, current_OR | numbers[i], x, numbers);
-
-    int exclude = countSubsequences(i + 1, current_OR, x, numbers);
-    
-    memo[key] = (include + exclude) % MOD;
-    return memo[key];
+    return count;
 }
 
 int main() {
@@ -43,9 +40,8 @@ int main() {
         if (M == 1) {
             numbers.push_back(x);
         } else {
-            memo.clear();
             // Here, we have to use std::cout because without using it I had got compilation error
-            std::cout << countSubsequences(0, 0, x, numbers) << std::endl;
+            std::cout << countValidSubsequences(x, numbers) << std::endl;
         }
     }
     return 0;
