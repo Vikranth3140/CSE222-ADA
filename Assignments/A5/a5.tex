@@ -1,0 +1,257 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+
+\usepackage[margin=2.2cm]{geometry}
+
+\title{Theory Assignment-5: ADA Winter-2024}
+\author{Vikranth Udandarao (2022570) \and Ansh Varshney (2022083)}
+
+\date{}
+\begin{document}
+
+\maketitle
+
+\section{Preprocessing and Assumptions}
+    In this problem, we preprocess, assume or have been given the following:
+
+    \begin{enumerate}
+        \item All the boxes have dimensions strictly between 10 cm and 20 cm in height, width, and depth.
+        \item Boxes can be nested if one box can be rotated to fit inside another, considering height, width, and depth constraints.
+    \end{enumerate}
+
+\section{Algorithm Description}
+
+    This section elaborates on the adaptation of the Ford-Fulkerson method to solve the problem of minimizing the number of visible boxes by optimally nesting them, conceptualizing the problem using a bipartite graph model.
+    
+    \subsection{Formulating as a Flow-Network Problem}
+        To address the box nesting problem, we first represent each box as a vertex in a flow network, creating a bipartite graph where each side of the bipartition represents a set of boxes. One side can potentially be nested inside boxes of the other side based on their dimensions. Additional vertices include a source \(s\) and a sink \(t\), completing the flow network.
+
+    \subsection{Bipartite Flow Network Construction}
+        \begin{enumerate}
+            \item \textbf{Vertices Representation:}
+            \begin{itemize}
+                \item Each box is treated as a vertex. The bipartite nature segregates boxes into two disjoint sets where edges only connect vertices from opposite sets, representing feasible nesting.
+            \end{itemize}
+        
+            \item \textbf{Edges Creation:}
+            \begin{itemize}
+                \item Directed edges are established between vertices across the bipartite sets if a box from one set can be nested inside a box from the opposite set.
+                \item The source vertex \(s\) is connected with edges to all boxes that potentially contain others, and all boxes that can be contained connect to the sink vertex \(t\).
+            \end{itemize}
+        
+            \item \textbf{Capacities Assignment:}
+            \begin{itemize}
+                \item As typical in bipartite graphs used in flow networks, the capacity of each edge is set to 1, representing the single opportunity for one box to nest into another.
+            \end{itemize}
+        \end{enumerate}
+
+    \subsection{Applying the Ford-Fulkerson Algorithm in Bipartite Context}
+        Using the Ford-Fulkerson method, the algorithm seeks to maximize the flow from \(s\) to \(t\), reflecting the optimal nesting of boxes. Each iteration of the algorithm enhances the flow by finding augmenting paths in the bipartite graph, effectively calculating the maximum matching between the sets of boxes that can nest one another.
+        
+        The maximum flow found corresponds directly to the maximum number of boxes that can be nested within each other, minimizing the number of boxes that remain visible, i.e., those that do not participate in any matching and thus are not nested.
+        
+        This approach not only provides an efficient computational method but also leverages the structural properties of bipartite graphs to ensure an optimal and correct solution to the nesting problem.
+
+
+\section{Pseudocode}
+
+    \begin{algorithm}
+    \caption{Minimizing Visible Boxes}
+        \begin{algorithmic}[1]
+        
+            \Function{canNestInside}{Box a, Box b}
+                \State \Return (a.height \textless\ b.height) and (a.width \textless\ b.width) and (a.depth \textless\ b.depth) \Comment{Check if Box a can nest inside Box b}
+            \EndFunction
+
+        \vspace{0.5cm}
+
+            \Function{addEdge}{\texttt{vector<vector<int>>} \&capacity, int from, int to}
+                \State capacity[from][to] $\gets$ 1  \Comment{Create directed edge with capacity 1}
+            \EndFunction
+
+        \vspace{0.5cm}
+
+            \Function{fordFulkerson}{\texttt{vector<vector<int>>} capacity, int source, int sink}
+                \State int totalFlow $\gets$ 0  \Comment{Initialize total flow to 0}
+                \State int numVertices $\gets$ capacity.size()  \Comment{Get the number of vertices in the graph}
+                \State \texttt{<vector>} residualCapacity $\gets$ capacity \Comment{Create a copy of capacity for residual calculations}
+                \While{true} \Comment{Continue until no augmenting path is found}
+                    \State \texttt{vector<int>} parent(numVertices, -1)  \Comment{Track the parent of each vertex}
+                    \State \texttt{queue<int>} q  \Comment{Queue for BFS}
+                    \State q.push(source)
+                    \State parent[source] $\gets$ source  \Comment{Start BFS from the source}
+        
+                    \While{not q.empty() and parent[sink] == -1}  \Comment{Execute BFS until the sink is reached}
+                        \State int u $\gets$ q.front()
+                        \State q.pop()
+                        \For{int v = 0 to numVertices - 1}
+                            \If{parent[v] == -1 and residualCapacity[u][v] \textless\ 0}
+                                \State parent[v] $\gets$ u
+                                \State q.push(v)
+                                \If{v == sink}
+                                    \State break  \Comment{Break if sink is reached}
+                                \EndIf
+                            \EndIf
+                        \EndFor
+                    \EndWhile
+        
+                    \If{parent[sink] == -1}
+                        \State \textbf{break}  \Comment{No augmenting path, so break the loop}
+                    \EndIf
+        
+                    \State int pathFlow $\gets$ INT\_MAX  \Comment{Find the minimum capacity in the path from source to sink}
+                    \For{int v = sink; v != source; v = parent[v]}
+                        \State int u $\gets$ parent[v]
+                        \State pathFlow $\gets$ min(pathFlow, residualCapacity[u][v])
+                    \EndFor
+        
+                    \For{int v = sink; v != source; v = parent[v]}  \Comment{Update the residual capacities of the path edges}
+                        \State int u $\gets$ parent[v]
+                        \State residualCapacity[u][v] -= pathFlow
+                        \State residualCapacity[v][u] += pathFlow
+                    \EndFor
+        
+                    \State totalFlow += pathFlow  \Comment{Add path flow to total flow}
+                \EndWhile
+                \State \Return totalFlow  \Comment{Return the total flow, which is the max flow}
+            \EndFunction
+        \end{algorithmic}
+    \end{algorithm}
+    
+    \begin{algorithm}[2]
+    \caption{Main}
+        \begin{algorithmic}[1]
+            \Function{Main}{}
+                \State int n $\gets$ 5  \Comment{Example testcase}
+                \State \texttt{vector<Box>} boxes $\gets$ \{Box(11, 12, 13), Box(15, 16, 17), Box(14, 15, 16), Box(18, 19, 20), Box(12, 13, 14)\}  \Comment{Predefined box dimensions}
+                \State int source $\gets$ n  \Comment{Define source vertex index}
+                \State int sink $\gets$ n + 1  \Comment{Define sink vertex index}
+                \State \texttt{vector<vector<int>>} capacity(n + 2, \texttt{vector<int>}(n + 2, 0))  \Comment{Initialize the capacity matrix}
+                \For{int i = 0 to n - 1}
+                    \For{int j = 0 to n - 1}
+                        \If{i != j and canNestInside(boxes[i], boxes[j])}
+                            \State addEdge(capacity, i, j)  \Comment{Add edge if one box can nest inside another}
+                        \EndIf
+                    \EndFor
+                \EndFor
+                \For{int i = 0 to n - 1}
+                    \State addEdge(capacity, source, i)  \Comment{Connect source to all boxes}
+                    \State addEdge(capacity, i, sink)  \Comment{Connect all boxes to sink}
+                \EndFor
+                \State int minVisibleBoxes $\gets$ n - \Call{fordFulkerson}{capacity, source, sink}  \Comment{Calculate minimum visible boxes}
+                \State cout << "Minimum number of visible boxes: " << minVisibleBoxes  \Comment{Output the result}
+            \EndFunction
+        \end{algorithmic}
+    \end{algorithm}
+
+\section{Complexity Analysis}
+
+    \subsection{Time Complexity}
+        \begin{enumerate}
+            \item \textbf{Constructing the Flow Network:}
+            \begin{itemize}
+                \item Constructing vertices and edges in the network involves examining each pair of boxes to determine if one can nest inside another. For \(n\) boxes, this results in \(O(n^2)\) comparisons.
+            \end{itemize}
+            
+            \item \textbf{Ford-Fulkerson Algorithm:}
+            \begin{itemize}
+                \item The Ford-Fulkerson algorithm involves finding augmenting paths and updating the flow until no augmenting paths remain. The worst-case time complexity is \(O(max\_flow \times (|V| + |E|))\), where \(|V|\) is the number of vertices and \(|E|\) is the number of edges.
+                \item In our scenario, since each box can only be nested once and the capacity of each edge is 1, the maximum flow is at most \(n\). Therefore, the complexity becomes \(O(n \times (n + n^2))\), simplifying to \(O(n^3)\).
+            \end{itemize}
+        \end{enumerate}
+        
+        Combining these components, the overall time complexity of the algorithm can be considered as \(O(n^3)\), driven primarily by the Ford-Fulkerson component.
+    
+    \subsection{Space Complexity}
+        \begin{enumerate}
+            \item \textbf{Flow Network Storage:}
+            \begin{itemize}
+                \item The adjacency matrix used to represent the capacity between each pair of vertices requires \(O(V^2)\) space, where \(V\) is the number of vertices, including the source and sink.
+            \end{itemize}
+            
+            \item \textbf{Auxiliary Space:}
+            \begin{itemize}
+                \item Additional space is required for maintaining parent arrays, queue data structures during BFS, and other temporary data during flow updates. This adds up to \(O(V)\) space.
+            \end{itemize}
+        \end{enumerate}
+        
+        Thus, the total space complexity of the algorithm is \(O(V^2)\), where \(V\) includes all box vertices plus the source and sink nodes, effectively resulting in \(O((n+2)^2)\) which simplifies to \(O(n^2)\).
+
+\section{Necessary and Sufficient Conditions explaining the algorithm}
+
+    The correctness of the Ford-Fulkerson algorithm in solving the box nesting problem hinges on several necessary and sufficient conditions related to the properties of the flow network and the nature of the flow itself. These conditions ensure that the algorithm not only terminates but also yields the optimal solution—minimizing the number of visible boxes.
+    
+    \subsection{Necessary Conditions}
+        These are conditions that must be met for the algorithm to function correctly:
+        \begin{enumerate}
+            \item \textbf{Network Representation Validity:} The flow network must accurately represent all potential nesting relationships among the boxes. This involves correct vertex creation for each box and appropriate directed edges that reflect possible nesting, based on the dimensional comparisons of the boxes.
+            \item \textbf{Proper Initialization:} The initial flow in the network must be zero, and capacities on all edges must be set correctly—edges between boxes should have a capacity of 1 (indicating a single nesting opportunity), and similarly, edges from the source to boxes and from boxes to the sink must also have a capacity of 1 to ensure that each box is considered only once.
+            \item \textbf{Path Augmentation Integrity:} During each iteration, the path found by the algorithm (using BFS or DFS) that increases the flow must be an augmenting path with available capacity. This ensures that each flow increment is feasible given the current state of the network.
+        \end{enumerate}
+    
+    \subsection{Sufficient Conditions}
+        These are conditions that, when satisfied, guarantee the optimality and correctness of the algorithm's outcome:
+        \begin{enumerate}
+            \item \textbf{Conservation of Flow:} At every non-source, non-sink vertex in the network, the total flow into a vertex must equal the total flow out of it. This flow conservation principle is crucial for ensuring that no flow is lost or created within the network, mirroring the physical reality that each box can either nest another or be nested.
+            \item \textbf{Absence of Augmenting Paths at Termination:} The Ford-Fulkerson algorithm terminates when no more augmenting paths from the source to the sink can be found in the residual graph. The absence of such paths means that it is not possible to push additional flow through the network, indicating that the maximum flow has been achieved.
+            \item \textbf{Max-Flow Min-Cut Theorem:} The maximum flow through the network equals the capacity of the minimum cut in the network (the smallest set of edges that, if removed, would disconnect the source from the sink). This theorem not only provides a stopping criterion but also assures us that the maximum number of boxes have been nested optimally, minimizing the number of visible boxes.
+        \end{enumerate}
+    
+    These conditions collectively guarantee that the Ford-Fulkerson method correctly identifies the maximum possible nesting of boxes, which directly translates to the minimum number of visible boxes. By ensuring that these conditions are met, we can confidently claim that the solution provided by the algorithm is not only feasible but also optimal.
+
+\section{Proof of Correctness}
+    This section provides a formal proof of the correctness of the Ford-Fulkerson algorithm when applied to the problem of minimizing the number of visible boxes by maximizing the nesting of boxes within each other, considering the bipartite nature of the constructed flow network.
+    
+    \subsection{Basis of the Proof}
+        The proof is based on the following pillars:
+        \begin{enumerate}
+            \item The flow network correctly represents the nesting possibilities between boxes as a bipartite graph.
+            \item The Ford-Fulkerson algorithm finds the maximum flow in this network.
+            \item The maximum flow corresponds to the maximum number of boxes that can be nested within each other.
+            \item The number of boxes minus the maximum flow yields the minimum number of visible boxes.
+        \end{enumerate}
+    
+    \subsection{Step-by-Step Proof}
+        \begin{enumerate}
+            \item \textbf{Flow Network Validity:}
+            \begin{itemize}
+                \item Each box is represented as a vertex. An edge from vertex \(i\) to vertex \(j\) exists if box \(i\) can be nested inside box \(j\), based on their dimensions, forming a bipartite graph where vertices are divided into two disjoint sets based on the possibility of nesting.
+                \item Source and sink vertices are added, with source edges directed to every box and sink edges directed from every box, all with unit capacity. This setup ensures that each box's use in nesting is accounted for exactly once.
+            \end{itemize}
+        
+            \item \textbf{Bipartite Graph Structure:}
+            \begin{itemize}
+                \item The bipartite graph effectively partitions the boxes into two sets where nesting relationships are possible only between elements of different sets, enhancing the clarity and efficiency of the network's representation.
+                \item This structure simplifies the search for augmenting paths, as each path alternates between the sets, which is characteristic of bipartite matching.
+            \end{itemize}
+        
+            \item \textbf{Application of Ford-Fulkerson:}
+            \begin{itemize}
+                \item The algorithm repeatedly finds augmenting paths from the source to the sink with available capacity. For each path, it adjusts the flow to push the maximum amount possible until no further augmenting paths exist.
+                \item By the properties of flow conservation and the nature of the Ford-Fulkerson method, each augmentation step ensures that the flow value is incremented optimally, reflecting an actual increase in nesting levels where possible.
+            \end{itemize}
+        
+            \item \textbf{Correspondence to Maximum Nesting:}
+            \begin{itemize}
+                \item When the algorithm terminates, the maximum flow through the network has been achieved. This flow value, by construction of the network, represents the maximum number of boxes that can be nested inside each other.
+                \item The termination occurs when no more augmenting paths can be found, which by the Max-Flow Min-Cut Theorem corresponds to the situation where the minimum cut of the network equals the flow value—signifying that no additional nesting is feasible without exceeding the physical constraints of the boxes.
+            \end{itemize}
+        
+            \item \textbf{Calculating Visible Boxes:}
+            \begin{itemize}
+                \item Since each unit of flow represents a box being nested within another, the total number of boxes minus the maximum flow gives the number of boxes that cannot be nested any further, thus remaining visible.
+            \end{itemize}
+        
+            \item \textbf{Conclusion:}
+            \begin{itemize}
+                \item The maximum flow thus directly correlates with the minimum number of visible boxes. Since the flow maximizes the internal nesting of boxes, reducing the external visibility count, the solution is both optimal and correct given the problem constraints.
+            \end{itemize}
+        \end{enumerate}
+    
+    This structured proof, built on fundamental principles of flow networks and optimization algorithms, rigorously demonstrates that the Ford-Fulkerson method, as applied here, yields an accurate and optimal solution to minimizing the number of visible boxes through nesting. The inclusion of the bipartite graph model further solidifies the theoretical correctness of the algorithm by leveraging its properties for more efficient matching and flow calculation.
+
+\end{document}
