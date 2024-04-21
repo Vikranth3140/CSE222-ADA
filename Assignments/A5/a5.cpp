@@ -1,76 +1,115 @@
 #include <iostream>
 #include <vector>
+#include <queue>
+#include <climits>
 #include <algorithm>
-#include <limits>
-#include <functional>
 
 using namespace std;
 
-// Define a structure for representing a box
+// Structure to represent a box
 struct Box {
-    int height;
-    int width;
-    int depth;
+    int height, width, depth;
+
+    // Constructor for ease of use
+    Box(int h, int w, int d) : height(h), width(w), depth(d) {}
+
+    // Function to check if this box can be nested inside another box 'b'
+    bool canNestInside(const Box& b) const {
+        // Checking all rotations
+        return (height < b.height && width < b.width && depth < b.depth) ||
+               (height < b.width && width < b.depth && depth < b.height) ||
+               (height < b.depth && width < b.height && depth < b.width);
+    }
 };
 
-// Function to check if box1 can be nested inside box2
-bool canNest(const Box& box1, const Box& box2) {
-    return box1.height < box2.height && box1.width < box2.width && box1.depth < box2.depth;
+// Function to add edges to the flow graph
+void addEdge(vector<vector<int>>& capacity, int from, int to) {
+    capacity[from][to] = 1;  // Capacity is 1, as each box can be placed only once
 }
 
-int main() {
-    vector<Box> boxes = {{15, 15, 15}, {12, 12, 12}, {18, 18, 18}};
-    int numBoxes = boxes.size();
-    int source = 0, sink = numBoxes + 1;
+// Find maximum flow using Ford-Fulkerson algorithm with BFS (Edmonds-Karp Implementation)
+int fordFulkerson(vector<vector<int>>& capacity, int source, int sink) {
+    int totalFlow = 0;
+    int numVertices = capacity.size();
+    vector<vector<int>> residualCapacity = capacity;
 
-    // Construct flow network graph
-    vector<vector<int>> graph(numBoxes + 2, vector<int>(numBoxes + 2, 0));
-    for (int i = 0; i < numBoxes; ++i) {
-        graph[source][i + 1] = 1; // Edge from source to box
-        graph[i + 1][sink] = 1;   // Edge from box to sink
-        for (int j = i + 1; j < numBoxes; ++j) {
-            if (canNest(boxes[i], boxes[j])) {
-                graph[i + 1][j + 1] = 1; // Edge between boxes if nesting is possible
-            }
-        }
-    }
+    while (true) {
+        vector<int> parent(numVertices, -1);
+        queue<int> q;
+        q.push(source);
+        parent[source] = source;
 
-    // Ford-Fulkerson's algorithm to find maximum flow in a flow network
-    vector<int> parent(numBoxes + 2);
-    int maxFlow = 0;
+        // BFS to find the shortest augmenting path
+        while (!q.empty() && parent[sink] == -1) {
+            int u = q.front();
+            q.pop();
 
-    // Augment the path in the residual graph using DFS
-    function<bool(int, int)> dfs = [&](int u, int minCapacity) {
-        if (u == sink) {
-            maxFlow += minCapacity;
-            int v = sink;
-            while (v != source) {
-                int u = parent[v];
-                graph[u][v] -= minCapacity;
-                graph[v][u] += minCapacity;
-                v = u;
-            }
-            return true;
-        }
-        for (int v = 0; v < numBoxes + 2; ++v) {
-            if (graph[u][v] > 0 && parent[v] == -1) {
-                parent[v] = u;
-                if (dfs(v, min(minCapacity, graph[u][v]))) {
-                    return true;
+            for (int v = 0; v < numVertices; ++v) {
+                if (parent[v] == -1 && residualCapacity[u][v] > 0) {
+                    parent[v] = u;
+                    q.push(v);
+                    if (v == sink) break; // Stop BFS once we reach the sink
                 }
             }
         }
-        return false;
-    };
 
-    while (true) {
-        fill(parent.begin(), parent.end(), -1);
-        parent[source] = source;
-        if (!dfs(source, numeric_limits<int>::max())) {
-            break;
+        // If no augmenting path is found, break the loop
+        if (parent[sink] == -1) break;
+
+        // Find the maximum flow through the path found.
+        int pathFlow = INT_MAX;
+        for (int v = sink; v != source; v = parent[v]) {
+            int u = parent[v];
+            pathFlow = min(pathFlow, residualCapacity[u][v]);
+        }
+
+        // Update residual capacities of the edges and reverse edges along the path
+        for (int v = sink; v != source; v = parent[v]) {
+            int u = parent[v];
+            residualCapacity[u][v] -= pathFlow;
+            residualCapacity[v][u] += pathFlow;
+        }
+
+        totalFlow += pathFlow;
+    }
+
+    return totalFlow;
+}
+
+int main() {
+    int n;
+    cout << "Enter number of boxes: ";
+    cin >> n;
+
+    vector<Box> boxes;
+    cout << "Enter dimensions (h w d) for each box:\n";
+    for (int i = 0; i < n; ++i) {
+        int h, w, d;
+        cin >> h >> w >> d;
+        boxes.emplace_back(h, w, d);
+    }
+
+    int source = n, sink = n + 1;
+    vector<vector<int>> capacity(n + 2, vector<int>(n + 2, 0));
+
+    // Construct the flow network
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i != j && boxes[i].canNestInside(boxes[j])) {
+                addEdge(capacity, i, j);
+            }
         }
     }
 
-    cout << "Maximum nesting of boxes: " << maxFlow << endl;
+    // Connect source to all nodes and all nodes to sink
+    for (int i = 0; i < n; ++i) {
+        addEdge(capacity, source, i);
+        addEdge(capacity, i, sink);
+    }
+
+    // Compute the minimum number of visible boxes
+    int minVisibleBoxes = n - fordFulkerson(capacity, source, sink);
+    cout << "Minimum number of visible boxes: " << minVisibleBoxes << endl;
+
     return 0;
 }
