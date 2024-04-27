@@ -1,6 +1,6 @@
 # CSE222: Algorithm Design & Analysis
 
-**<a href="https://techtree.iiitd.edu.in/viewDescription/filename?=CSE222">CSE222: *Algorithm Design & Analysis*</a>** is a 2xx-level course offered to undergrads pursuing the CSE and CS+X disciplines at IIIT-Delhi. The course focuses on the design and correctness of algorithms and to analyse their requirements.
+**<a href="https://techtree.iiitd.edu.in/viewDescription/filename?=CSE222">CSE222: *Algorithm Design & Analysis*</a>** is a 2xx-level course offered to undergrads pursuing the CSE and CS+X disciplines at <a href="https://iiitd.ac.in/">IIIT-Delhi</a>. The course focuses on the design and correctness of algorithms and to analyse their requirements.
 <br>
 It aims to:
 
